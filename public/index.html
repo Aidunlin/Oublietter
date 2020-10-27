@@ -8,8 +8,6 @@
 
   <script defer src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-  <!-- Initialize Firebase with config object -->
-  <script defer src="./firebase-init.js"></script>
 
   <style>
     * {
@@ -33,6 +31,17 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      let config = {
+        apiKey: "AIzaSyD00g8CdmsRsBf2FRZlpFb1huyHx6sD7VU",
+        authDomain: "oublietter-2e397.firebaseapp.com",
+        databaseURL: "https://oublietter-2e397.firebaseio.com",
+        projectId: "oublietter-2e397",
+        storageBucket: "oublietter-2e397.appspot.com",
+        messagingSenderId: "233002878038",
+        appId: "1:233002878038:web:c9dd507995977d2c1327f7"
+      }
+      firebase.initializeApp(config);
+
       firebase.auth().onAuthStateChanged(user => {
         if (user) {
           document.getElementById("output").innerHTML = user.displayName;

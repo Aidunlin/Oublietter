@@ -8,12 +8,29 @@
 
   <script defer src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
 
   <style>
     * {
+      background-color: black;
+      color: white;
       font-family: sans-serif;
     }
-    #signin, #signout {
+
+    button,
+    input {
+      border: 1px solid white;
+      padding: 4px 8px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    #signin,
+    #signout,
+    #name,
+    #submitname {
       display: none;
     }
   </style>
@@ -22,15 +39,25 @@
 <body>
   <h1>Oublietter (WIP)</h1>
   <p>A dungeon creator web app in early development.</p>
-  <p>Below is a super-basic Google sign in/out system.</p>
+  <p>Below is a super-basic Google sign in/out system with username changer.</p>
 
-  <button id="signin">Sign in</button>
-  <button id="signout">Sign out</button>
+  <p>
+    <button id="signin">Sign in</button>
+    <button id="signout">Sign out</button>
+  </p>
+  <p>
+    <input id="nick" placeholder="New nickname" maxlength="16">
+    <button id="submitnick">Submit</button>
+  </p>
 
-  <p id="output"></p>
+  <p>
+    Account name: <span id="accountname"></span>
+    <br>
+    Account nick: <span id="accountnick"></span>
+  </p>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
       let config = {
         apiKey: "AIzaSyD00g8CdmsRsBf2FRZlpFb1huyHx6sD7VU",
         authDomain: "oublietter-2e397.firebaseapp.com",
@@ -42,33 +69,67 @@
       }
       firebase.initializeApp(config);
 
-      firebase.auth().onAuthStateChanged(user => {
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      let currentNick = "";
+
+      function loadNick(user) {
+        let userDoc = db.collection("users").doc(user.uid);
+        userDoc.get().then(doc => {
+          if (doc.exists) {
+            currentNick = doc.data().nickname;
+          } else {
+            currentNick = user.displayName;
+            db.collection("users").doc(user.uid).set({
+              nickname: currentNick
+            }).catch(error => console.log("Error adding document: " + error));
+          }
+          document.getElementById("accountnick").innerHTML = currentNick;
+        }).catch(error => console.log("Error getting document: " + error));
+      }
+
+      auth.onAuthStateChanged(user => {
         if (user) {
-          document.getElementById("output").innerHTML = user.displayName;
+          loadNick(user);
           document.getElementById("signin").style.display = "none";
-          document.getElementById("signout").style.display = "inline";
+          document.getElementById("signout").style.display = "initial";
+          document.getElementById("nick").style.display = "initial";
+          document.getElementById("submitnick").style.display = "initial";
+          document.getElementById("accountname").innerHTML = user.displayName;
         } else {
-          document.getElementById("output").innerHTML = "Not signed in";
-          document.getElementById("signin").style.display = "inline";
+          document.getElementById("signin").style.display = "initial";
           document.getElementById("signout").style.display = "none";
+          document.getElementById("nick").style.display = "none";
+          document.getElementById("submitnick").style.display = "none";
+          document.getElementById("accountname").innerHTML = "Not signed in";
+          document.getElementById("accountnick").innerHTML = currentNick;
         }
       });
 
       document.getElementById("signin").onclick = () => {
         let provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider).then(result => {
-          let token = result.credential.accessToken;
-          let user = result.user;
-        }).catch(error => {
-          document.getElementById("output").innerHTML = JSON.stringify(error);
-        });
+        auth.signInWithPopup(provider).catch(error => console.log("Error getting auth: " + error));
       };
 
       document.getElementById("signout").onclick = () => {
-        firebase.auth().signOut().catch(error => {
-          document.getElementById("output").innerHTML = "Error occured";
-        });
+        auth.signOut().then(() => {
+          currentNick = "";
+          document.getElementById("accountnick").innerHTML = currentNick;
+        }).catch(error => console.log("Error signing out: " + error));
       };
+
+      document.getElementById("submitnick").onclick = () => {
+        if (auth.currentUser) {
+          db.collection("users").doc(auth.currentUser.uid).set({
+            nickname: document.getElementById("nick").value
+          }, { merge: true }).then(() => {
+            currentNick = document.getElementById("nick").value;
+            document.getElementById("accountnick").innerHTML = currentNick;
+            document.getElementById("nick").value = "";
+          }).catch(error => console.log("Error setting nick: " + error));
+        }
+      }
     });
   </script>
 </body>

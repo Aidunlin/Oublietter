@@ -6,34 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Oublietter (WIP)</title>
 
-  <script defer src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.2.4/firebase-app.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.2.4/firebase-auth.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/8.2.4/firebase-firestore.js"></script>
 
-  <style>
-    * {
-      background-color: black;
-      color: white;
-      font-family: sans-serif;
-    }
-
-    button,
-    input {
-      border: 1px solid white;
-      padding: 4px 8px;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    #signin,
-    #signout,
-    #name,
-    #submitname {
-      display: none;
-    }
-  </style>
+  <link rel="stylesheet" href="./index.css">
 </head>
 
 <body>
@@ -46,92 +23,23 @@
     <button id="signout">Sign out</button>
   </p>
   <p>
-    <input id="nick" placeholder="New nickname" maxlength="16">
-    <button id="submitnick">Submit</button>
+    <input id="newnick" placeholder="New nickname" maxlength="16">
+    <button id="submitnick">Submit Nick</button>
+  </p>
+  <p>
+    <input id="newdungeon" placeholder="New dungeon">
+    <button id="submitdungeon">Submit Dungeon</button>
   </p>
 
   <p>
-    Account name: <span id="accountname"></span>
+    Account name: <span id="namedisplay"></span>
     <br>
-    Account nick: <span id="accountnick"></span>
+    Account nick: <span id="nickdisplay"></span>
+    <br>
+    Dungeon: <span id="dungeondisplay"></span>
   </p>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      let config = {
-        apiKey: "AIzaSyD00g8CdmsRsBf2FRZlpFb1huyHx6sD7VU",
-        authDomain: "oublietter-2e397.firebaseapp.com",
-        databaseURL: "https://oublietter-2e397.firebaseio.com",
-        projectId: "oublietter-2e397",
-        storageBucket: "oublietter-2e397.appspot.com",
-        messagingSenderId: "233002878038",
-        appId: "1:233002878038:web:c9dd507995977d2c1327f7"
-      }
-      firebase.initializeApp(config);
-
-      const auth = firebase.auth();
-      const db = firebase.firestore();
-
-      let currentNick = "";
-
-      function loadNick(user) {
-        let userDoc = db.collection("users").doc(user.uid);
-        userDoc.get().then(doc => {
-          if (doc.exists) {
-            currentNick = doc.data().nickname;
-          } else {
-            currentNick = user.displayName;
-            db.collection("users").doc(user.uid).set({
-              nickname: currentNick
-            }).catch(error => console.log("Error adding document: " + error));
-          }
-          document.getElementById("accountnick").innerHTML = currentNick;
-        }).catch(error => console.log("Error getting document: " + error));
-      }
-
-      auth.onAuthStateChanged(user => {
-        if (user) {
-          loadNick(user);
-          document.getElementById("signin").style.display = "none";
-          document.getElementById("signout").style.display = "initial";
-          document.getElementById("nick").style.display = "initial";
-          document.getElementById("submitnick").style.display = "initial";
-          document.getElementById("accountname").innerHTML = user.displayName;
-        } else {
-          document.getElementById("signin").style.display = "initial";
-          document.getElementById("signout").style.display = "none";
-          document.getElementById("nick").style.display = "none";
-          document.getElementById("submitnick").style.display = "none";
-          document.getElementById("accountname").innerHTML = "Not signed in";
-          document.getElementById("accountnick").innerHTML = currentNick;
-        }
-      });
-
-      document.getElementById("signin").onclick = () => {
-        let provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(error => console.log("Error getting auth: " + error));
-      };
-
-      document.getElementById("signout").onclick = () => {
-        auth.signOut().then(() => {
-          currentNick = "";
-          document.getElementById("accountnick").innerHTML = currentNick;
-        }).catch(error => console.log("Error signing out: " + error));
-      };
-
-      document.getElementById("submitnick").onclick = () => {
-        if (auth.currentUser) {
-          db.collection("users").doc(auth.currentUser.uid).set({
-            nickname: document.getElementById("nick").value
-          }, { merge: true }).then(() => {
-            currentNick = document.getElementById("nick").value;
-            document.getElementById("accountnick").innerHTML = currentNick;
-            document.getElementById("nick").value = "";
-          }).catch(error => console.log("Error setting nick: " + error));
-        }
-      }
-    });
-  </script>
+  <script src="./index.js"></script>
 </body>
 
 </html>

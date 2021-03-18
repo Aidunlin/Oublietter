@@ -96,3 +96,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 });
+
+draggable = new PlainDraggable(document.getElementById("draggable"));

@@ -1,4 +1,4 @@
-* {
+body, button, input {
   background-color: black;
   color: white;
   font-family: sans-serif;
@@ -19,4 +19,15 @@ button {
 #name,
 #submitname {
   display: none;
+}
+
+#drag-region {
+  border: 1px solid white;
+  height: 400px;
+}
+
+.draggable {
+  border: 1px solid white;
+  display: inline-block;
+  padding: 4px;
 }

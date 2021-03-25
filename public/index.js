@@ -1,34 +1,27 @@
-let signIn = document.getElementById("signin");
-let signOut = document.getElementById("signout");
-
-let newNick = document.getElementById("newnick");
-let submitNick = document.getElementById("submitnick");
-
-let newDungeon = document.getElementById("newdungeon");
-let submitDungeon = document.getElementById("submitdungeon");
-
-let nameDisplay = document.getElementById("namedisplay");
-let nickDisplay = document.getElementById("nickdisplay");
-let dungeonDisplay = document.getElementById("dungeondisplay");
+let nameText = document.getElementById("name-text");
+let signInBtn = document.getElementById("sign-in");
+let signOutBtn = document.getElementById("sign-out");
+let newDungeonInput = document.getElementById("new-dungeon");
+let submitDungeonBtn = document.getElementById("submit-dungeon");
+let dungeonWrap = document.getElementById("dungeon-wrap");
+let dungeonView = document.getElementById("dungeon-view");
+let dungeonText = document.getElementById("dungeon-text");
 
 let auth;
 let db;
-let currentNick = "";
 let currentDungeon = {};
 let currentUserDoc;
 
-let dragRegion = document.getElementById("drag-region");
 let drags;
 let lines;
 let pDrags;
+let lLines;
 
 function toggleDisplaySignIn(signedIn) {
-  signIn.style.display = signedIn ? "none" : "initial";
-  signOut.style.display = signedIn ? "initial" : "none";
-  newNick.style.dispay = signedIn ? "initial" : "none";
-  submitNick.style.display = signedIn ? "initial" : "none";
-  newDungeon.style.dispay = signedIn ? "initial" : "none";
-  submitDungeon.style.dispay = signedIn ? "initial" : "none";
+  signInBtn.style.display = signedIn ? "none" : "initial";
+  signOutBtn.style.display = signedIn ? "initial" : "none";
+  newDungeonInput.style.dispay = signedIn ? "initial" : "none";
+  submitDungeonBtn.style.dispay = signedIn ? "initial" : "none";
 }
 
 function handleError(error) {
@@ -59,52 +52,39 @@ document.addEventListener("DOMContentLoaded", () => {
       currentUserDoc = db.collection("users").doc(user.uid);
       currentUserDoc.get().then(doc => {
         if (doc.exists) {
-          currentNick = doc.data().nickname;
           currentDungeon = JSON.parse(doc.data().dungeon);
           createDragsAndLines();
         } else {
-          currentNick = user.displayName;
-          currentUserDoc.set({ nickname: currentNick }).catch(handleError);
+          currentUserDoc.set({}).catch(handleError);
         }
-        nickDisplay.innerHTML = currentNick;
-        dungeonDisplay.innerHTML = JSON.stringify(currentDungeon);
+        dungeonText.innerHTML = JSON.stringify(currentDungeon);
       }).catch(handleError);
       toggleDisplaySignIn(true);
-      nameDisplay.innerHTML = user.displayName;
+      nameText.innerHTML = user.displayName;
     } else {
       toggleDisplaySignIn(false);
-      nameDisplay.innerHTML = "";
-      nickDisplay.innerHTML = "";
-      dungeonDisplay.innerHTML = "";
+      nameText.innerHTML = "";
+      dungeonText.innerHTML = "";
+      createDragsAndLines();
     }
   });
 });
 
-signIn.onclick = () => {
+signInBtn.onclick = () => {
   let provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(handleError);
 };
 
-signOut.onclick = () => {
-  auth.signOut().then(() => currentNick = "").catch(handleError);
+signOutBtn.onclick = () => {
+  auth.signOut().catch(handleError);
 };
 
-submitNick.onclick = () => {
+submitDungeonBtn.onclick = () => {
   if (auth.currentUser) {
-    currentUserDoc.update({ nickname: newNick.value }).then(() => {
-      currentNick = newNick.value;
-      nickDisplay.innerHTML = currentNick;
-      newNick.value = "";
-    }).catch(handleError);
-  }
-}
-
-submitDungeon.onclick = () => {
-  if (auth.currentUser) {
-    currentUserDoc.update({ dungeon: newDungeon.value }).then(() => {
-      currentDungeon = JSON.parse(newDungeon.value);
-      dungeonDisplay.innerHTML = newDungeon.value;
-      newDungeon.value = "";
+    currentUserDoc.update({ dungeon: newDungeonInput.value }).then(() => {
+      currentDungeon = JSON.parse(newDungeonInput.value);
+      dungeonText.innerHTML = newDungeonInput.value;
+      newDungeonInput.value = "";
     }).catch(handleError);
   }
 }
@@ -112,18 +92,18 @@ submitDungeon.onclick = () => {
 // More UI stuff
 
 function createDragsAndLines() {
-  dragRegion.innerHTML = "";
   if (lines) {
     lines.forEach(line => line.remove());
   }
-  for (let i = 0; i < currentDungeon.map.length; i++) {
+  dungeonView.innerHTML = "";
+  for (let i = 0; i < currentDungeon.map?.length; i++) {
     let newRoom = currentDungeon.map[i];
     let newDiv = document.createElement("div");
     newDiv.classList.add("draggable");
-    newDiv.innerHTML = `${newRoom.id}-${newRoom.name}`;
+    newDiv.innerHTML = "<span>" + newRoom.name + "</span>";
     newDiv.dataset.id = newRoom.id;
     newDiv.dataset.links = JSON.stringify(newRoom.links);
-    dragRegion.appendChild(newDiv);
+    dungeonView.appendChild(newDiv);
   }
   drags = document.getElementsByClassName("draggable");
   lines = [];
@@ -133,15 +113,23 @@ function createDragsAndLines() {
     for (let j = 0; j < linkArray.length; j++) {
       let currentLink = linkArray[j];
       let linkedRoomIndex = currentDungeon.map[i].links[currentLink];
-      lines.push(new LeaderLine(drags[i], drags[linkedRoomIndex], {
+      let lineOptions = {
         color: "rgb(255, 255, 255)",
         size: 2,
         path: "straight",
         startPlug: "behind",
         endPlug: "behind",
-      }));
+      };
+      let newLine = new LeaderLine(drags[i], drags[linkedRoomIndex], lineOptions);
+      lines.push(newLine);
     }
-    pDrags.push(new PlainDraggable(drags[i]));
+    pDrags.push(new PlainDraggable(drags[i], {
+      autoScroll: dungeonWrap,
+    }));
+  }
+  lLines = document.getElementsByClassName("leader-line");
+  for (let i = 0; i < lLines.length; i++) {
+    dungeonView.appendChild(lLines[i]);
   }
 }
 

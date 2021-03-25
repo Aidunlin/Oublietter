@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Oublietter (WIP)</title>
+  <title>Oublietter</title>
   <script defer src="https://www.gstatic.com/firebasejs/8.2.4/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.2.4/firebase-auth.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/8.2.4/firebase-firestore.js"></script>
@@ -12,42 +12,28 @@
 </head>
 
 <body>
-  <h1>Oublietter (WIP)</h1>
+  <h1>Oublietter</h1>
   <p>A dungeon creator web app in early development.</p>
-
+  <p>Welcome <span id="name-text"></span></p>
+  
   <p>
-    <button id="signin">Sign in with Google</button>
-    <button id="signout">Sign out</button>
-  </p>
-  <p>
-    <label for="newnick">New nickname</label>
-    <br>
-    <input id="newnick" placeholder="Max 16 characters" maxlength="16">
-    <button id="submitnick">Submit nick</button>
-  </p>
-  <p>
-    <label for="newdungeon">New dungeon</label>
-    <br>
-    <input id="newdungeon" placeholder="Paste in JSON">
-    <button id="submitdungeon">Submit dungeon</button>
+    <button id="sign-in">Sign in with Google</button>
+    <button id="sign-out">Sign out</button>
   </p>
 
   <p>
-    Name: <span id="namedisplay"></span>
+    <label for="new-dungeon">New dungeon</label>
     <br>
-    Nick: <span id="nickdisplay"></span>
-    <br>
-    <details>
-      <summary>Dungeon:</summary>
-      <code>
-        <p id="dungeondisplay"></p>
-      </code>
-    </details>
+    <input id="new-dungeon" placeholder="Paste in JSON">
+    <button id="submit-dungeon">Submit dungeon</button>
   </p>
 
-  <hr>
-
-  <div id="drag-region"></div>
+  <div id="dungeon-wrap">
+    <div id="dungeon-view"></div>
+  </div>
+  <p>
+    <code id="dungeon-text"></code>
+  </p>
 
   <script src="./plain-draggable.min.js"></script>
   <script src="./leader-line.min.js"></script>

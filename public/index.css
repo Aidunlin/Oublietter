@@ -1,33 +1,50 @@
-body, button, input {
+html {
+  overflow: hidden;
+}
+
+html, body, button, input, .draggable {
   background-color: black;
   color: white;
   font-family: sans-serif;
 }
 
 button,
-input {
+input,
+#dungeon-wrap,
+.draggable {
   border: 1px solid white;
+}
+
+button,
+input,
+.draggable {
+  display: inline-block;
   padding: 4px 8px;
+}
+
+.draggable {
+  height: 100px;
+  width: 100px;
+}
+
+.leader-line {
+  display: inline-block;
 }
 
 button {
   cursor: pointer;
 }
 
-#signin,
-#signout,
-#name,
-#submitname {
+#sign-out {
   display: none;
 }
 
-#drag-region {
-  border: 1px solid white;
+#dungeon-wrap {
   height: 400px;
+  overflow: scroll;
 }
 
-.draggable {
-  border: 1px solid white;
-  display: inline-block;
-  padding: 4px;
+#dungeon-view {
+  height: 1000px;
+  width: 1000px;
 }
